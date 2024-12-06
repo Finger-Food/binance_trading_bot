@@ -10,6 +10,7 @@ import sqlalchemy
 # Parameters
 SYMBOL = "BTCUSDT"
 AT_RISK = 0.1  # Position sizing amount willing to invest
+PAPER_TRADING = True
 
 SHORT_EMA_PERIOD = 5 
 LONG_EMA_PERIOD = 20
@@ -17,12 +18,16 @@ RSI_PERIOD = 14
 RSI_LOW_THRES = 50
 RSI_UPPER_THRES = 50
 
-# Binance Testnet API keys
-api_key = config.tn_api_key
-api_secret = config.tn_api_secret
+# Binance API keys, currently set as test_net for paper trading
+if PAPER_TRADING:
+    api_key = config.tn_api_key
+    api_secret = config.tn_api_secret
+else:
+    api_key = config.api_key
+    api_secret = config.api_secret
 
 # Initialize Binanceclient
-client = Client(api_key, api_secret, testnet=True)
+client = Client(api_key, api_secret, testnet=PAPER_TRADING)
 client.https_proxy = None   # a proxy is required without this line
 
 # Log of trades made by the bot
@@ -148,41 +153,6 @@ async def run_bot():
         while True:
             msg = await trade_socket.recv()
             await process_trade_message(position, msg)
-
-# # Main Trading Loop
-# def run_bot():
-#     """Run the bot continuously."""
-#     print("Starting trading bot on Binance Testnet...")
-#     starting_balance = get_balance("USDT") + get_balance("BTC") * get_current_price("BTCUSDT")
-
-#     while True:
-#         try:
-#             # Analyze market
-#             signal = analyze_market(symbol)
-
-#             # Fetch balances
-#             usdt_balance = get_balance("USDT")
-#             btc_balance = get_balance("BTC")
-#             current_price = get_current_price(symbol)
-
-#             # Take action based on signal
-#             if signal == "buy" and usdt_balance >= trade_quantity * current_price:
-#                 buy(symbol, trade_quantity)
-#             elif signal == "sell" and btc_balance >= trade_quantity:
-#                 sell(symbol, trade_quantity)
-#             else:
-#                 print("No action taken.")
-
-#             # Calculate ROI periodically
-#             calculate_roi(starting_balance)
-
-#             # Wait before the next iteration
-#             time.sleep(60)  # Run every 1 minute
-#         except Exception as e:
-#             print(f"Error in bot execution: {e}")
-#             time.sleep(60)  # Wait before retrying
-
-
 
 # Start the bot
 if __name__ == "__main__":
